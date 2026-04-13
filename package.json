@@ -1,0 +1,30 @@
+{
+  "name": "message-throttling-prueba",
+  "version": "1.0.0",
+  "description": "Prueba de throttling de mensajes con RabbitMQ, Redis y Express",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start:api": "node app.js",
+    "start:worker": "node src/worker.js",
+    "start:mock": "node src/provider/mock-provider.js",
+    "test:burst": "node test-burst.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "axios": "^1.6.0",
+    "bottleneck": "^2.19.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.1",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.3.0"
+  }
+}
