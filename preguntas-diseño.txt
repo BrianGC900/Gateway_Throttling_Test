@@ -1,0 +1,3 @@
+1. ¿Cómo garantizas que ningún mensaje se pierda si el proceso de Componente B se reinicia en medio de una ráfaga?
+2. ¿Cómo escalarías Componente B si necesitaras correr múltiples instancias en paralelo sin duplicar envíos?
+3. Tu solución actual procesa mensajes en orden FIFO. ¿En qué escenario necesitarías priorización? ¿Cómo lo implementarías?
