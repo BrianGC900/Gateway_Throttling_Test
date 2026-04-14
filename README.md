@@ -27,7 +27,7 @@ Abre tu terminal y ejecuta:
 Para poner en marcha el sistema, sigue estos pasos en orden:
 
 ```bash
-# 1. Clona el repositorio (reemplaza con tu URL)
+# 1. Clona el repositorio
 git clone https://github.com/BrianGC900/Gateway_Throttling_Test.git
 
 # 2. Entra al directorio del proyecto
