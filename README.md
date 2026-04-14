@@ -12,7 +12,7 @@ Sistema asíncrono de alto rendimiento para el encolamiento, procesamiento y env
 ## Requisitos Previos
 * [Git](https://git-scm.com/)
 * [Node.js](https://nodejs.org/) (v18 o superior recomendado)
-* [Docker](https://www.docker.com/) y Docker Compose (para levantar RabbitMQ y Redis)
+* [Docker](https://www.docker.com/) y Docker Compose (para levantar el stack completo)
 
 ---
 
@@ -28,7 +28,7 @@ Para poner en marcha el sistema, sigue estos pasos en orden:
 
 ```bash
 # 1. Clona el repositorio (reemplaza con tu URL)
-git clone [https://github.com/BrianGC900/Gateway_Throttling_Test.git](https://github.com/BrianGC900/Gateway_Throttling_Test.git)
+git clone https://github.com/BrianGC900/Gateway_Throttling_Test.git
 
 # 2. Entra al directorio del proyecto
 cd message-throttling-prueba
@@ -67,26 +67,12 @@ docker-compose up -d
 
 *(Espera unos segundos a que los contenedores arranquen. Puedes verificar RabbitMQ en `http://localhost:15672` con user/pass: admin/admin123)*
 
+Ver los logs en tiempo real (Recomendado):
+
+```bash
+docker-compose logs -f
+```
 ---
-
-## Ejecución del Sistema (Terminales Múltiples)
-
-Para ver el sistema funcionando, necesitas abrir **3 terminales distintas** (asegúrate de estar en la carpeta del proyecto en todas ellas):
-
-**Terminal 1: Iniciar el Mock Server (Proveedor)**
-```bash
-npm run start:mock
-```
-
-**Terminal 2: Iniciar el Worker (Procesador de Colas)**
-```bash
-npm run start:worker
-```
-
-**Terminal 3: Iniciar el API Gateway**
-```bash
-npm run start:api
-```
 
 ## Documentación de la API
 
@@ -97,9 +83,23 @@ npm run start:api
 ### 1. Encolar Mensaje
 **POST** `http://localhost:3000/api/send`
 
-Agrega un mensaje a la cola para su procesamiento asíncrono.
+Agrega un mensaje a la cola para su procesamiento asíncrono, abre una nueva terminal y ejecuta:
 
-**Ejemplo de petición con cURL:**
+**Ejemplo en Windows (PowerShell):**
+```bash
+$body = @{
+  id = "msg_001"
+  to = "+525500000000"
+  content = "Contenido del mensaje de prueba"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/send" `
+  -Method POST `
+  -Body $body `
+  -ContentType "application/json"
+```
+
+**Ejemplo en Linux / macOS / Git Bash (cURL):**
 ```bash
 curl -X POST http://localhost:3000/api/send \
   -H "Content-Type: application/json" \
@@ -130,22 +130,28 @@ curl -X POST http://localhost:3000/api/send \
 
 Obtiene el estado en tiempo real (`queued`, `processing`, `sent`, `retrying`, `failed`).
 
+**Ejemplo de petición con Windows + PowerShell:**
+```bash
+Invoke-RestMethod -Uri "http://localhost:3000/api/status/msg_001" -Method GET
+```
+
 **Ejemplo de petición con cURL:**
 ```bash
 curl http://localhost:3000/api/status/msg_001
-
+```
 ---
 
 ## Pruebas (Testing)
+Abre una **nueva terminal** y lanza las pruebas (asegurate de estar dentro de la carpeta)
 
 ### Pruebas Unitarias
-Ejecuta la suite de pruebas unitarias de Jest para validar la lógica del Gateway (no requiere Docker):
+Ejecuta la suite de pruebas unitarias de Jest para validar la lógica del Gateway (abre una nueva terminal y ejecuta):
 ```bash
 npm test
 ```
 
 ### Prueba de Carga Masiva (Burst Test)
-Para probar el límite del *throttling*, abre una **cuarta terminal** y lanza el script:
+Para probar el límite del *throttling*:
 
 ```bash
 npm run test:burst
