@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3000;
 const URL = `http://localhost:${PORT}`;
 
 const API_URL = `${URL}/api/send`;
-const TOTAL_MESSAGES = 1000;
+const TOTAL_MESSAGES = 100000; // Cambia este número para probar con más o menos mensajes
 const BATCH_SIZE = 5000;
 
 const runBurstTest = async () => {
