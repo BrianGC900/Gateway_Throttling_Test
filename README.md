@@ -110,7 +110,7 @@ curl -X POST http://localhost:3000/api/send \
   }'
 ```
 
-* **Body (JSON):**
+* **Body (JSON): Copiar y pegar en postman: seleccionar Body -> dentro de raw, (Metodo POST -> url: http://localhost:3000/api/send)**
     ```json
     {
       "id": "msg_001",
@@ -126,6 +126,7 @@ curl -X POST http://localhost:3000/api/send \
 ---
 
 ### 2. Consultar Estado de Mensaje (Trazabilidad)
+En Postman solo selecciona el metodo GET y pega la URL:
 **GET** `http://localhost:3000/api/status/:id`
 
 Obtiene el estado en tiempo real (`queued`, `processing`, `sent`, `retrying`, `failed`).
