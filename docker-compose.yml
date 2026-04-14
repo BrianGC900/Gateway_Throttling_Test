@@ -1,25 +1,71 @@
 services:
+  # --- INFRAESTRUCTURA ---
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: gateway_rabbitmq
     ports:
-      - "${RABBITMQ_PORT}:5672"
-      - "${RABBITMQ_UI_PORT}:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_UI_PORT:-15672}:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    restart: unless-stopped
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-pass}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: gateway_redis
     ports:
-      - "${REDIS_PORT}:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- MIS SERVICIOS ---
+  gateway-api:
+    build: .
+    container_name: gateway_api
+    command: npm run start:api
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASS:-pass}@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    container_name: gateway_worker
+    command: npm run start:worker
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASS:-pass}@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+      - PLATFORM_C_URL=http://mock-platform-c:4000/api/external/send
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # --- MOCK DE C ---
+  mock-platform-c:
+    build: .
+    container_name: mock_c
+    command: npm run start:mock
+    ports:
+      - "4000:4000"
+    environment:
+      - MOCK_PORT=4000
 
 volumes:
   rabbitmq_data:
