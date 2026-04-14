@@ -1,3 +1,14 @@
 1. ¿Cómo garantizas que ningún mensaje se pierda si el proceso de Componente B se reinicia en medio de una ráfaga?
+ - Si el worker o componente B se llega a caer, se quedan en cola es decir son persistentes en disco de rabbitMQ, estos reinicios pueden causar que un mensaje se entregue dos veces, 
+   es decir si se cayó el componente B pero envio el mensaje a la plataforma C con éxito ahi entra redis para validar que ese id ya fue entregado y no haga un doble ACK, lo ignoraria o si
+   no se ha realizado el ACK lo haria para limpiar la cola de RabbitMQ.
+
 2. ¿Cómo escalarías Componente B si necesitaras correr múltiples instancias en paralelo sin duplicar envíos?
+ - hacer que mi rate-limiting sea global y compartido. asegurar que el mismo ID no se procese dos veces si se llegan a caer 3/5 workers o plataformas B, pasar el cliente de redis a mi rate-limiter
+   se centraliza el contador todos los worker consultan a redis antes de disparar la petición.
+
 3. Tu solución actual procesa mensajes en orden FIFO. ¿En qué escenario necesitarías priorización? ¿Cómo lo implementarías?
+ - todo mi flujo funciona como FIFO, el escenario puede ser un mensaje OTP para iniciar sesion, se realiza la peticion y si tengo que enviar 100k esa request pasaria a ser el ultimo en la fila,
+   ahi necesitaria priorización ya que es mas importante ese otp, de la forma que lo implementaría seria actualizar rabbitMQ usando RabbitMQ Priority Queues, mandaria un argumento especial a rabbit 
+   con eso el ya colocaria en la fila por prioridad, se intercepta esa request y ese type que se puede definir en el body para avisarle a rabbitMQ que priorize, y con eso worker.js no tendria que
+   configurarse o actualizarse, eso ya vendria desde la cola.  

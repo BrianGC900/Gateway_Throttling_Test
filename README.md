@@ -90,10 +90,25 @@ npm run start:api
 
 ## Documentación de la API
 
+**Tip para pruebas:** Puedes probar estos endpoints utilizando una herramienta gráfica como [Postman](https://www.postman.com/) o directamente desde tu terminal usando `cURL`.
+
+---
+
 ### 1. Encolar Mensaje
 **POST** `http://localhost:3000/api/send`
 
 Agrega un mensaje a la cola para su procesamiento asíncrono.
+
+**Ejemplo de petición con cURL:**
+```bash
+curl -X POST http://localhost:3000/api/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "msg_001",
+    "to": "+525500000000",
+    "content": "Contenido del mensaje de prueba"
+  }'
+```
 
 * **Body (JSON):**
     ```json
@@ -108,10 +123,16 @@ Agrega un mensaje a la cola para su procesamiento asíncrono.
     * `202 Accepted` (status: "ignored"): Mensaje duplicado, el `id` ya fue registrado.
     * `400 Bad Request`: Faltan campos requeridos.
 
+---
+
 ### 2. Consultar Estado de Mensaje (Trazabilidad)
 **GET** `http://localhost:3000/api/status/:id`
 
 Obtiene el estado en tiempo real (`queued`, `processing`, `sent`, `retrying`, `failed`).
+
+**Ejemplo de petición con cURL:**
+```bash
+curl http://localhost:3000/api/status/msg_001
 
 ---
 
